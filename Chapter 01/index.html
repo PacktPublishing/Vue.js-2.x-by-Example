@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="app">
+			<p>The shirt costs {{ shirtCost }}</p>
+			<p>The hat costs {{ hatCost }}</p>
+		</div>
+		<script src="https://unpkg.com/vue"></script>
+		<script type="text/javascript">
+		const app = new Vue({
+			el: '#app',
+			data: {
+				shirtPrice: 25,
+				hatPrice: 10,
+
+				currency: '$',
+				salesTax: 16
+			},
+			computed: {
+				shirtCost() {
+					return this.addCurrency(this.calculateSalesTax(this.shirtPrice))
+				},
+				hatCost() {
+					return this.addCurrency(this.calculateSalesTax(this.hatPrice))
+				},
+			},
+			methods: {
+				calculateSalesTax(price) {
+					// Work out the price of the item including sales tax
+					return parseFloat(
+						Math.round((this.salesTax / 100) * price) + price
+					).toFixed(2);
+				},
+
+				addCurrency(price) {
+					return this.currency + price;
+				}
+			}
+		});
+		</script>
+	</body>
+</html>

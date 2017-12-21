@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="app">
+			<filtering v-bind:filter="filter" v-on:change-filter-field="changeFilter" v-on:change-filter-query="changeQuery"></filtering>
+			<table>
+				<template v-for="individual in people">
+					<team-member v-bind:person="individual" v-bind:filter="filter"></team-member>
+				</template>
+			</table>
+		</div>
+
+		<script type="text/x-template" id="filtering-template">
+		<form>
+			<label for="fiterField">
+				Field:
+				<select v-on:change="changeFilterField($event)" id="filterField">
+					<option value="">Disable filters</option>
+					<option value="isActive">Active user</option>
+					<option value="name">Name</option>
+					<option value="email">Email</option>
+					<option value="balance">Balance</option>
+					<option value="registered">Date registered</option>
+				</select>
+			</label>
+			<label for="filterQuery" v-show="this.filter.field && !isActiveFilterSelected()">
+				Query:
+				<input type="text" id="filterQuery" v-model="filter.query">
+			</label>
+
+			<span v-show="isActiveFilterSelected()">
+				Active:
+
+				<label for="userStateActive">
+					Yes:
+					<input type="radio" v-bind:value="true" id="userStateActive" v-model="filter.query">
+				</label>
+
+				<label for="userStateInactive">
+					No:
+					<input type="radio" v-bind:value="false" id="userStateInactive" v-model="filter.query">
+				</label>
+			</span>
+		</form>
+		</script>
+
+		<script type="text/x-template" id="team-member-template">
+		<tr v-show="filterRow()">
+			<td>
+				{{ person.name }}
+			</td>
+			<td>
+				<a v-bind:href="'mailto:' + person.email">{{ person.email }}</a>
+			</td>
+			<td v-bind:class="balanceClass">
+				{{ balance }}
+			</td>
+			<td>
+				{{ dateRegistered }}
+			</td>
+			<td v-bind:class="activeClass">
+				{{ status }}
+			</td>
+		</tr>
+		</script>
+
+		<script src="https://unpkg.com/vue"></script>
+		<script type="text/javascript">
+		Vue.component('team-member', {
+			template: '#team-member-template',
+			props: {
+				person: Object,
+				filter: Object
+			},
+			data() {
+				return {
+					currency: '$'
+				}
+			},
+			computed: {
+				/**
+				* CSS Classes
+				*/
+				activeClass() {
+					return this.person.isActive ? 'active' : 'inactive';
+				},
+
+				balanceClass() {
+					let balanceLevel = 'success';
+
+					if(this.person.balance < 2000) {
+						balanceLevel = 'error';
+					} else if (this.person.balance < 3000) {
+						balanceLevel = 'warning';
+					}
+
+					let increasing = false,
+					balance = this.person.balance / 1000;
+
+					if(Math.round(balance) == Math.ceil(balance)) {
+						increasing = 'increasing';
+					}
+
+					return [balanceLevel, increasing];
+				},
+
+				/**
+				* Fields
+				*/
+				balance() {
+					return this.currency + this.person.balance.toFixed(2);
+				},
+				dateRegistered() {
+					let registered = new Date(this.registered);
+
+					return registered.toLocaleString('en-US');
+				},
+				status() {
+					return output = (this.person.isActive) ? 'Active' : 'Inactive';
+				}
+			},
+			methods: {
+				filterRow() {
+					let visible = true,
+					field = this.filter.field,
+					query = this.filter.query;
+
+					if(field) {
+
+						if(this.filter.field === 'isActive') {
+							visible = (typeof query === 'boolean') ? (query === this.person.isActive) : true;
+						} else {
+
+							query = String(query),
+							field = this.person[field];
+
+							if(typeof field === 'number') {
+								query.replace(this.currency, '');
+
+								try {
+									visible = eval(field + query);
+								} catch(e) {}
+
+							} else {
+
+								field = field.toLowerCase();
+								visible = field.includes(query.toLowerCase());
+
+							}
+						}
+					}
+					return visible;
+				}
+			}
+		});
+
+		Vue.component('filtering', {
+			template: '#filtering-template',
+			props: {
+				filter: Object
+			},
+			methods: {
+				isActiveFilterSelected() {
+					return (this.filter.field === 'isActive');
+				},
+
+				changeFilterField(event) {
+					this.filedField = '';
+					this.$emit('change-filter-field', event.target.value);
+				},
+			},
+			watch: {
+				'filter.query': function() {
+					this.$emit('change-filter-query', this.filter.query)
+				}
+			}
+		});
+
+		const app = new Vue({
+			el: '#app',
+
+			data: {
+				people: [{"index":0,"guid":"49c9d9f7-af12-4ded-9357-44993eea0f7a","isActive":true,"balance":2570.32,"name":"Morales Ochoa","email":"moralesochoa@savvy.com","registered":"2016-02-22T10:11:31","friends":[{"id":3}]},{"index":1,"guid":"530855cb-63f8-4272-929d-cf544b1a056d","isActive":true,"balance":1892.1,"name":"Tyson Beard","email":"tysonbeard@savvy.com","registered":"2016-01-27T01:06:57","friends":[{"id":1}]},{"index":2,"guid":"88f9b85b-c4b4-4a0c-813c-54e027fff67f","isActive":false,"balance":3423.69,"name":"Hawkins Gibbs","email":"hawkinsgibbs@savvy.com","registered":"2016-04-23T11:19:49","friends":[{"id":3}]},{"index":3,"guid":"35050ff6-51b7-48a4-951b-74f8f115cfcb","isActive":true,"balance":3277.41,"name":"Conley Boyle","email":"conleyboyle@savvy.com","registered":"2014-06-04T04:22:31","friends":[{"id":1}]},{"index":4,"guid":"f2c7f2f2-719b-4f8a-be5f-4e66538fbd2d","isActive":true,"balance":2180.15,"name":"Joy Mosley","email":"joymosley@savvy.com","registered":"2016-04-21T11:52:18","friends":[{"id":1}]}],
+				filter: {
+					field: '',
+					query: ''
+				}
+			},
+			methods: {
+				changeFilter(field) {
+					this.filter.query = '';
+					this.filter.field = field;
+				},
+				changeQuery(query) {
+					this.filter.query = query;
+				}
+			}
+		});
+		
+		</script>
+	</body>
+</html>

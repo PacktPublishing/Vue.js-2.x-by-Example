@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="app">
+			<form>
+				<label for="fiterField">
+					Field:
+					<select id="filterField" v-model="filterField">
+						<option value="">Disable filters</option>
+						<option value="isActive">Active user</option>
+						<option value="name">Name</option>
+						<option value="email">Email</option>
+						<option value="balance">Balance</option>
+						<option value="registered">Date registered</option>
+					</select>
+				</label>
+
+				<label for="filterQuery" v-show="this.filterField && !isActiveFilterSelected()">
+					Query:
+					<input type="text" id="filterQuery" v-model="filterQuery">
+				</label>
+
+				<span v-show="isActiveFilterSelected()">
+					Active:
+					<label for="userStateActive">
+						Yes:
+						<input type="radio" v-bind:value="true" id="userStateActive" v-model="filterUserState">
+					</label>
+					<label for="userStateInactive">
+						No:
+						<input type="radio" v-bind:value="false" id="userStateInactive" v-model="filterUserState">
+					</label>
+				</span>
+			</form>
+
+			<table>
+				<tr v-for="person in people" v-show="filterRow(person)">
+					<td>{{ person.name }}</td>
+					<td>
+						<a v-bind:href="'mailto:' + person.email">{{ person.email }}</a>
+					</td>
+					<td v-bind:class="balanceClass(person)">
+						{{ formatBalance(person.balance) }}
+					</td>
+					<td>{{ formatDate(person.registered) }}</td>
+					<td v-bind:class="activeClass(person)">
+						{{ activeStatus(person) }}
+					</td>
+				</tr>
+			</table>
+
+		</div>
+		<script src="https://unpkg.com/vue"></script>
+		<script type="text/javascript">
+		const app = new Vue({
+			el: '#app',
+
+			data: {
+				people: [{"index":0,"guid":"49c9d9f7-af12-4ded-9357-44993eea0f7a","isActive":true,"balance":2570.32,"name":"Morales Ochoa","email":"moralesochoa@savvy.com","registered":"2016-02-22T10:11:31","friends":[{"id":3}]},{"index":1,"guid":"530855cb-63f8-4272-929d-cf544b1a056d","isActive":true,"balance":1892.1,"name":"Tyson Beard","email":"tysonbeard@savvy.com","registered":"2016-01-27T01:06:57","friends":[{"id":1}]},{"index":2,"guid":"88f9b85b-c4b4-4a0c-813c-54e027fff67f","isActive":false,"balance":3423.69,"name":"Hawkins Gibbs","email":"hawkinsgibbs@savvy.com","registered":"2016-04-23T11:19:49","friends":[{"id":3}]},{"index":3,"guid":"35050ff6-51b7-48a4-951b-74f8f115cfcb","isActive":true,"balance":3277.41,"name":"Conley Boyle","email":"conleyboyle@savvy.com","registered":"2014-06-04T04:22:31","friends":[{"id":1}]},{"index":4,"guid":"f2c7f2f2-719b-4f8a-be5f-4e66538fbd2d","isActive":true,"balance":2180.15,"name":"Joy Mosley","email":"joymosley@savvy.com","registered":"2016-04-21T11:52:18","friends":[{"id":1}]}],
+
+				currency: '$',
+
+				filterField: '',
+				filterQuery: '',
+				filterUserState: ''
+			},
+			methods: {
+				activeStatus(person) {
+					return (person.isActive) ? 'Active' : 'Inactive';
+				},
+
+				activeClass(person) {
+					return person.isActive ? 'active' : 'inactive';
+				},
+				balanceClass(person) {
+					let balanceLevel = 'success';
+
+					if(person.balance < 2000) {
+						balanceLevel = 'error';
+					} else if (person.balance < 3000) {
+						balanceLevel = 'warning';
+					}
+
+					let increasing = false,
+					balance = person.balance / 1000;
+
+					if(Math.round(balance) == Math.ceil(balance)) {
+						increasing = 'increasing';
+					}
+
+					return [balanceLevel, increasing];
+				},
+
+				formatBalance(balance) {
+					return this.currency + balance.toFixed(2);
+				},
+				formatDate(date) {
+					let registered = new Date(date);
+					return registered.toLocaleString('en-US');
+				},
+
+				filterRow(person) {
+					let result = true;
+					if(this.filterField) {
+
+						if(this.filterField === 'isActive') {
+
+							result = (typeof this.filterUserState === 'boolean') ? (this.filterUserState === person.isActive) : true;
+						} else {
+
+							let query = this.filterQuery,
+							field = person[this.filterField];
+
+							if(typeof field === 'number') {
+								query.replace(this.currency, '');
+								try {
+									result = eval(field + query);
+								} catch(e) {}
+							} else {
+								field = field.toLowerCase();
+								result = field.includes(query.toLowerCase());
+							}
+						}
+					}
+
+					return result;
+				},
+
+				isActiveFilterSelected() {
+					return (this.filterField === 'isActive');
+				}
+			}
+		});
+		</script>
+	</body>
+</html>
