@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vue Shop</title>
+
+  <link rel="stylesheet" href="http://cdn.rawgit.com/yegor256/tacit/gh-pages/tacit-css-1.1.0.min.css">
+  <style type="text/css">
+    body {
+      max-width: 50rem;
+      margin: 5rem auto;
+    }
+    ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    ol li {
+      width: calc(25% - 0.5rem);
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: thin solid #ccc;
+    }
+
+    #app {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    header {
+      width: 100%;
+      text-align: right;
+    }
+    aside {
+      width: 10rem;
+      padding-left: 1rem
+    }
+    main {
+      width: calc(100% - 10rem);
+    }
+
+    .filterGroup {
+      padding: 1rem;
+      border: thin solid #ccc;
+      margin-bottom: 1rem
+    }
+    label {display: block}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <router-link :to="{name: 'Basket'}">Cart {{ cartQuantity }}</router-link>
+    </header>
+    <main>
+      <router-view></router-view>
+    </main>
+    <aside>
+      <router-view name="sidebar"></router-view>
+    </aside>
+  </div>
+
+  <!-- Libraries -->
+  <script type="text/javascript" src="js/libs/csv.js"></script>
+  <script type="text/javascript" src="js/libs/vue.js"></script>
+  <script type="text/javascript" src="js/libs/vuex.js"></script>
+  <script type="text/javascript" src="js/libs/router.js"></script>
+  <script type="text/javascript" src="js/libs/vue-shopify-products.js"></script>
+
+  <!-- Components -->
+  <script src="js/components/ListCategories.js"></script>
+  <script src="js/components/ListProducts.js"></script>
+  <script src="js/components/ListPurchases.js"></script>
+  <script src="js/components/ProductFiltering.js"></script>
+
+  <!-- Views -->
+  <script src="js/views/PageNotFound.js"></script>
+  <script src="js/views/CategoryPage.js"></script>
+  <script src="js/views/HomePage.js"></script>
+  <script src="js/views/OrderBasket.js"></script>
+  <script src="js/views/OrderCheckout.js"></script>
+  <script src="js/views/OrderConfirmation.js"></script>
+  <script src="js/views/ProductPage.js"></script>
+
+  <!-- App -->
+  <script type="text/javascript" src="js/app.js"></script>
+</body>
+</html>
